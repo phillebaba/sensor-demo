@@ -69,7 +69,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9184ec0f67963218600cbe33ebe3d552aa88c1b3aff2953c010caa7305797aa1"
+  digest = "1:4827c8e93c0ec5f4b35fdd96e85e11e7b059e8eb0a093946e880aa574b563af6"
   name = "golang.org/x/net"
   packages = [
     "http/httpguts",
@@ -83,7 +83,7 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "d66e71096ffb9f08f36d9aefcae80ce319de6d68"
+  revision = "491137f692577e390404f177a0515c9f86f79754"
 
 [[projects]]
   branch = "master"

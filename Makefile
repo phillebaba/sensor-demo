@@ -13,16 +13,16 @@ build_web: proto
 	@npm run --prefix ./web build
 
 dep:
-	dep ensure -update
+	@cd go; dep ensure
 
-run_server:
+run_server: dep
 	@go run go/cmd/server/main.go
 
-build_server:
+build_server: dep
 	@go build -i -v -o go/cmd/server/main.go
 
-run_client:
+run_client: dep
 	@go run go/cmd/client/main.go
 
-build_client:
+build_client: dep
 	@go build -i -v -o go/cmd/client/main.go
