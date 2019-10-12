@@ -1,0 +1,24 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "@improbable-eng/grpc-web": "^0.11.0",
+    "google-protobuf": "^3.10.0",
+    "ts-protoc-gen": "^0.11.0"
+  },
+  "devDependencies": {
+    "copy-webpack-plugin": "^5.0.4",
+    "webpack": "^4.41.1",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "scripts": {
+    "start:dev": "webpack-dev-server --content-base build",
+    "build": "webpack --content-base build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

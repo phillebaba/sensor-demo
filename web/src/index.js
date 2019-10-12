@@ -1,6 +1,6 @@
 const {grpc} = require("@improbable-eng/grpc-web");
 
-const {TemperatureServiceClient} = require('./proto/temperature_pb_service.js')
+const {TemperatureServiceClient} = require('../proto/temperature_pb_service.js')
 const {Empty} = require("google-protobuf/google/protobuf/empty_pb")
 
 const client = new TemperatureServiceClient('http://localhost:7777');

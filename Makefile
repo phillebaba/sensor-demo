@@ -6,6 +6,12 @@ proto:
 	@mkdir -p web/proto
 	@protoc -I proto --plugin=protoc-gen-ts=./web/node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:web/proto --ts_out=service=grpc-web:web/proto --go_out=plugins=grpc:go/pkg/api proto/temperature.proto
 
+run_web: proto
+	@npm run --prefix ./web start:dev
+
+build_web: proto
+	@npm run --prefix ./web build
+
 dep:
 	dep ensure -update
 
