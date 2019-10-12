@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+message TemperatureResponse {
+  double temperature = 1;
+}
+
+service TemperatureService {
+  rpc GetTemperature(google.protobuf.Empty) returns (stream TemperatureResponse) {}
+}

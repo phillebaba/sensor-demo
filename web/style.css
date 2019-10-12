@@ -1,0 +1,21 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.5em;
+}
+
+.box {
+  background: hsl(252, 7%, 39%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box div {
+  text-align: center;
+  width: 100%;
+  color: #404040;
+}
