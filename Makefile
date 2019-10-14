@@ -2,18 +2,21 @@
 
 all: build_server build_client
 
-proto:
+dep:
+	@cd go; dep ensure
+
+npm:
+	@cd web; npm install
+
+proto: npm dep
 	@mkdir -p web/proto
 	@protoc -I proto --plugin=protoc-gen-ts=./web/node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:web/proto --ts_out=service=grpc-web:web/proto --go_out=plugins=grpc:go/pkg/api proto/temperature.proto
 
 run_web: proto
-	@npm run --prefix ./web start:dev
+	@npm run --prefix ./web start
 
-build_web: proto
-	@npm run --prefix ./web build
-
-dep:
-	@cd go; dep ensure
+docker_build_web: proto
+	@docker build -t phillebaba/sensor-demo-web:latest -f web/docker/Dockerfile web/
 
 run_server: dep
 	@go run go/cmd/server/main.go
