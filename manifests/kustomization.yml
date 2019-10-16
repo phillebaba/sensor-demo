@@ -3,3 +3,10 @@ kind: Kustomization
 resources:
 - deployment.yml
 - service.yml
+
+vars:
+- name: MOSQUITTO_SERVICE
+  objref:
+    kind: Service
+    name: mosquitto
+    apiVersion: v1

@@ -41,7 +41,7 @@ spec:
           name: ttyacm
         env:
         - name: MQTT_BROKER_IP
-          value: mosquitto.default.svc.cluster.local
+          value: $(MOSQUITTO_SERVICE)
       volumes:
       - name: ttyacm
         hostPath:
@@ -68,7 +68,7 @@ spec:
         - containerPort: 7777
         env:
         - name: MQTT_BROKER_IP
-          value: mosquitto.default.svc.cluster.local
+          value: $(MOSQUITTO_SERVICE)
 ---
 apiVersion: apps/v1
 kind: Deployment
