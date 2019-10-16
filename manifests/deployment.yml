@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: phillebaba/sensor-demo-web
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+spec:
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+      - name: client
+        image: phillebaba/sensor-demo
+        command: ["sensor-demo-client"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - mountPath: /dev/ttyACM0
+          name: ttyacm
+        env:
+        - name: MQTT_BROKER_IP
+          value: mosquitto.default.svc.cluster.local
+      volumes:
+      - name: ttyacm
+        hostPath:
+          path: /dev/ttyACM0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+spec:
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: phillebaba/sensor-demo
+        command: ["sensor-demo-server"]
+        ports:
+        - containerPort: 7777
+        env:
+        - name: MQTT_BROKER_IP
+          value: mosquitto.default.svc.cluster.local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+spec:
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      containers:
+      - name: mosquitto
+        image: eclipse-mosquitto:1.6.7
+        ports:
+        - containerPort: 1883
+          name: "mqtt"
