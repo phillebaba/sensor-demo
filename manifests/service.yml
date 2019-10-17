@@ -4,8 +4,8 @@ metadata:
   name: mosquitto
 spec:
   ports:
-  - port: 1883
-    protocol: TCP
+  - protocol: TCP
+    port: 1883
   selector:
     app: mosquitto
 ---
@@ -15,8 +15,8 @@ metadata:
   name: web
 spec:
   ports:
-  - port: 80
-    protocol: TCP
+  - protocol: TCP
+    port: 80
   selector:
     app: web
 ---
@@ -26,7 +26,8 @@ metadata:
   name: server
 spec:
   ports:
-  - port: 80
-    protocol: TCP
+  - protocol: TCP
+    port: 80
+    targetPort: 7777
   selector:
     app: server
