@@ -46,6 +46,7 @@ spec:
       - name: ttyacm
         hostPath:
           path: /dev/ttyACM0
+          type: File
 ---
 apiVersion: apps/v1
 kind: Deployment
