@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/caarlos0/env"
@@ -11,6 +14,7 @@ import (
 )
 
 type config struct {
+	Debug        bool   `env:"DEBUG" envDefault:"false"`
 	BrokerIp     string `env:"MQTT_BROKER_IP" envDefault:"localhost"`
 	BrokerPort   int    `env:"MQTT_BROKER_PORT" envDefault:"1883"`
 	MessageTopic string `env:"MQTT_MESSAGE_TOPIC" envDefault:"temperature"`
@@ -39,22 +43,7 @@ func main() {
 	}
 	log.Println("Connected to mqtt broker")
 
-	// Setup serial connection
-	options := serial.OpenOptions{
-		PortName:        cfg.PortName,
-		BaudRate:        cfg.BaudRate,
-		DataBits:        8,
-		StopBits:        1,
-		MinimumReadSize: 1,
-	}
-
-	log.Println("Opening serial port")
-	port, err := serial.Open(options)
-	if err != nil {
-		log.Fatalf("serial.Open: %v", err)
-	}
-	log.Println("Opened serial port")
-
+	port := openPort(cfg.PortName, cfg.BaudRate, cfg.Debug)
 	defer port.Close()
 
 	// Start reading serial data
@@ -82,6 +71,32 @@ func main() {
 	}
 }
 
+// Opens serial port and returns io object that can be read from.
+func openPort(portName string, baudRate uint, debug bool) io.ReadWriteCloser {
+	if debug {
+		log.Println("Using debug serial device")
+		return DebugSerialDevice{}
+	}
+
+	options := serial.OpenOptions{
+		PortName:        portName,
+		BaudRate:        baudRate,
+		DataBits:        8,
+		StopBits:        1,
+		MinimumReadSize: 1,
+	}
+
+	log.Println("Opening serial port")
+	port, err := serial.Open(options)
+	if err != nil {
+		log.Fatalf("serial.Open: %v", err)
+	}
+	log.Println("Opened serial port")
+
+	return port
+}
+
+// Parse read buffer for float values encapsulated with "<" and ">".
 func scan(buffer []byte) ([]string, int) {
 	results := []string{}
 	start := false
@@ -104,4 +119,29 @@ func scan(buffer []byte) ([]string, int) {
 	}
 
 	return results, lastIndex
+}
+
+type DebugSerialDevice struct {
+}
+
+func (d DebugSerialDevice) Read(p []byte) (n int, err error) {
+	time.Sleep(1000 * time.Millisecond)
+
+	min := -25
+	max := 50
+	number := rand.Intn(max-min+1) + min
+	b := []byte("<" + strconv.Itoa(number) + ">")
+	for i, value := range b {
+		p[i] = value
+	}
+
+	return len(b), nil
+}
+
+func (d DebugSerialDevice) Write(p []byte) (n int, err error) {
+	return 0, nil
+}
+
+func (d DebugSerialDevice) Close() error {
+	return nil
 }

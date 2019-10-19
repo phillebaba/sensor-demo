@@ -29,6 +29,10 @@ func main() {
 
 	log.Println("%+v", cfg)
 
+	b := api.NewBroker()
+	go b.Start()
+	defer b.Stop()
+
 	// Setup mqtt connection
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", cfg.BrokerIp, cfg.BrokerPort))
@@ -40,21 +44,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// create a server instance
-	s := api.Server{}
-
-	// Subscribe to topic
 	log.Println("Subscribing to topic")
 	client.Subscribe(cfg.MessageTopic, 0, func(client mqtt.Client, msg mqtt.Message) {
 		temperature, _ := strconv.ParseFloat(string(msg.Payload()), 64)
-		if s.Stream != nil {
-			if err := s.Stream.Send(&api.TemperatureResponse{Temperature: temperature}); err != nil {
-				//return err
-			}
-		}
+		b.Publish(temperature)
 	})
 
 	// grpc
+	s := api.Server{Broker: b}
 	grpcServer := grpc.NewServer()
 	api.RegisterTemperatureServiceServer(grpcServer, &s)
 
@@ -72,7 +69,7 @@ func main() {
 	}
 
 	httpServer := http.Server{
-		Addr:    "localhost:7777",
+		Addr:    "0.0.0.0:7777",
 		Handler: http.HandlerFunc(handler),
 	}
 
