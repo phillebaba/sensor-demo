@@ -2,8 +2,7 @@
 
 IMAGE ?= phillebaba/sensor-demo
 VERSION ?= $(shell git describe --tags --always --dirty)
-#TAG ?= $(VERSION)
-TAG ?= "latest"
+TAG ?= $(VERSION)
 PLATFORMS ?= "linux/amd64,linux/arm64,linux/arm"
 
 all: build_server build_client
