@@ -1,11 +1,16 @@
-.PHONY: all proto build_server build_client
+.PHONY: all
 
-IMAGE ?= phillebaba/sensor-demo
-VERSION ?= $(shell git describe --tags --always --dirty)
-TAG ?= $(VERSION)
-PLATFORMS ?= "linux/amd64,linux/arm64,linux/arm"
+VERSION := $(shell git describe --tags --always --dirty)
 
-all: build_server build_client
+IMAGE_REGISTRY := "phillebaba"
+IMAGE_NAME := "sensor-demo"
+IMAGE_TAG_NAME := $(VERSION)
+IMAGE_REPO := $(IMAGE_REGISTRY)/$(IMAGE_NAME)
+IMAGE_TAG := $(IMAGE_REPO):$(IMAGE_TAG_NAME)
+
+PLATFORMS := "linux/amd64,linux/arm64,linux/arm"
+
+all: image
 
 dep:
 	@cd go; dep ensure
@@ -20,20 +25,19 @@ proto: npm dep
 run_web: proto
 	@npm run --prefix ./web start
 
-docker_push_web: proto
-	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-	@docker buildx rm cross
-	@docker buildx create --use --name cross --platform $(PLATFORMS)
-	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE)-web:$(TAG) --push -f web/docker/Dockerfile web
-
 run_server: dep
 	@go run go/cmd/server/main.go
 
 run_client: dep
 	@go run go/cmd/client/main.go
 
-docker_push_go:
+image:
+	@docker build -t $(IMAGE) go
+	@docker build -t $(IMAGE) -f web/docker/Dockerfile web
+
+push: proto
 	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	@docker buildx rm cross
 	@docker buildx create --use --name cross --platform $(PLATFORMS)
-	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE):$(TAG) --push go
+	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG) --push go
+	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE)-web:$(TAG) --push -f web/docker/Dockerfile web
