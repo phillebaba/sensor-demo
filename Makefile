@@ -14,7 +14,8 @@ PLATFORMS := "linux/amd64,linux/arm64,linux/arm"
 all: image
 
 dep:
-	@cd go; dep ensure
+	@go get github.com/golang/dep/cmd/dep
+	@cd go; dep ensure -vendor-only
 
 npm:
 	@cd web; npm install
@@ -26,10 +27,10 @@ proto: npm dep
 run_web: proto
 	@npm run --prefix ./web start
 
-run_server: dep
+run_server: proto
 	@go run go/cmd/server/main.go
 
-run_client: dep
+run_client: proto
 	@go run go/cmd/client/main.go
 
 image:
@@ -38,7 +39,6 @@ image:
 
 push: proto
 	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-	@docker buildx rm cross
-	@docker buildx create --use --name cross --platform $(PLATFORMS)
+	@docker buildx create --use --name cross --platform $(PLATFORMS) --node cross0
 	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG_GO) --push go
 	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG_WEB) --push -f web/docker/Dockerfile web
