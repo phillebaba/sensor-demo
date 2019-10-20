@@ -1,4 +1,4 @@
-.PHONY: all
+.PHONY: all proto
 
 VERSION := $(shell git describe --tags --always --dirty)
 
@@ -13,24 +13,22 @@ PLATFORMS := "linux/amd64,linux/arm64,linux/arm"
 
 all: image
 
+proto:
+	@mkdir -p web/proto
+	@docker run --rm -v ${PWD}:${PWD} -w ${PWD} phillebaba/protoc-docker:6a297cf -I./proto --js_out=import_style=commonjs,binary:web/proto --ts_out=service=grpc-web:web/proto --go_out=plugins=grpc:go/pkg/api proto/temperature.proto
+
+run_web: proto
+	@cd web; npm install
+	@npm run --prefix ./web start
+
 dep:
 	@go get github.com/golang/dep/cmd/dep
 	@cd go; dep ensure -vendor-only
 
-npm:
-	@cd web; npm install
-
-proto: npm dep
-	@mkdir -p web/proto
-	@protoc -I proto --plugin=protoc-gen-ts=./web/node_modules/.bin/protoc-gen-ts --js_out=import_style=commonjs,binary:web/proto --ts_out=service=grpc-web:web/proto --go_out=plugins=grpc:go/pkg/api proto/temperature.proto
-
-run_web: proto
-	@npm run --prefix ./web start
-
-run_server: proto
+run_server: dep proto
 	@go run go/cmd/server/main.go
 
-run_client: proto
+run_client: dep proto
 	@go run go/cmd/client/main.go
 
 image:
