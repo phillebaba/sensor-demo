@@ -6,7 +6,8 @@ IMAGE_REGISTRY := "phillebaba"
 IMAGE_NAME := "sensor-demo"
 IMAGE_TAG_NAME := $(VERSION)
 IMAGE_REPO := $(IMAGE_REGISTRY)/$(IMAGE_NAME)
-IMAGE_TAG := $(IMAGE_REPO):$(IMAGE_TAG_NAME)
+IMAGE_TAG_GO := $(IMAGE_REPO):$(IMAGE_TAG_NAME)
+IMAGE_TAG_WEB := $(IMAGE_REPO)-web:$(IMAGE_TAG_NAME)
 
 PLATFORMS := "linux/amd64,linux/arm64,linux/arm"
 
@@ -32,12 +33,12 @@ run_client: dep
 	@go run go/cmd/client/main.go
 
 image:
-	@docker build -t $(IMAGE) go
-	@docker build -t $(IMAGE) -f web/docker/Dockerfile web
+	@docker build -t $(IMAGE_TAG_GO) go
+	@docker build -t $(IMAGE_TAG_WEB) -f web/docker/Dockerfile web
 
 push: proto
 	@docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 	@docker buildx rm cross
 	@docker buildx create --use --name cross --platform $(PLATFORMS)
-	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG) --push go
-	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE)-web:$(TAG) --push -f web/docker/Dockerfile web
+	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG_GO) --push go
+	@docker buildx build --platform $(PLATFORMS) -t $(IMAGE_TAG_WEB) --push -f web/docker/Dockerfile web
