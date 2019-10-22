@@ -30,6 +30,10 @@ spec:
       labels:
         app: client
     spec:
+      initContainers:
+      - name: init-mqtt
+        image: busybox:1.31.0
+        command: ['sh', '-c', 'until nslookup $(MOSQUITTO_SERVICE); do echo waiting for mqtt; sleep 2; done;']
       containers:
       - name: client
         image: phillebaba/sensor-demo
@@ -61,6 +65,10 @@ spec:
       labels:
         app: server
     spec:
+      initContainers:
+      - name: init-mqtt
+        image: busybox:1.31.0
+        command: ['sh', '-c', 'until nslookup $(MOSQUITTO_SERVICE); do echo waiting for mqtt; sleep 2; done;']
       containers:
       - name: server
         image: phillebaba/sensor-demo
